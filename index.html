@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Peminjaman & Pengembalian Buku Perpustakaan</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .nav-tabs button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #e2e8f0;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs button.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-size: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="tel"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button.submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button.submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Perpustakaan Digital Puskesmas Kebandaran</h1>
+        <p>Sistem Layanan Peminjaman dan Pengembalian Buku</p>
+    </header>
+
+    <div class="container">
+        <!-- Menu Navigasi / Dasbor -->
+        <div class="nav-tabs">
+            <button id="btnPinjamTab" class="active" onclick="switchTab('pinjam')">Dasbor Pinjam Buku</button>
+            <button id="btnKembaliTab" onclick="switchTab('kembali')">Dasbor Pengembalian Buku</button>
+        </div>
+
+        <!-- Form Menu Pinjam Buku -->
+        <div id="formPinjam" class="form-section active">
+            <h2>Formulir Peminjaman Buku</h2>
+            <form id="pinjamForm" onsubmit="handleSubmit(event, 'pinjam')">
+                <div class="form-group">
+                    <label for="namaPinjam">Nama Peminjam</label>
+                    <input type="text" id="namaPinjam" required placeholder="Masukkan nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="bukuPinjam">Pinjam Buku Apa (Judul Buku)</label>
+                    <input type="text" id="bukuPinjam" required placeholder="Masukkan judul buku">
+                </div>
+                <div class="form-group">
+                    <label for="tanggalPinjam">Tanggal Pinjam</label>
+                    <input type="date" id="tanggalPinjam" required>
+                </div>
+                <div class="form-group">
+                    <label for="hpPinjam">Nomor Handphone Peminjam</label>
+                    <input type="tel" id="hpPinjam" required placeholder="Contoh: 081234567890">
+                </div>
+                <div class="form-group">
+                    <label for="fotoPinjam">Bukti Foto (Foto Kartu Identitas / Buku)</label>
+                    <input type="file" id="fotoPinjam" accept="image/*" required>
+                </div>
+                <button type="submit" class="submit-btn" id="submitPinjamBtn">Kirim & Simpan Data Pinjam</button>
+                <div class="loading" id="loadingPinjam">Mengunggah foto ke Google Drive & menyimpan data... Mohon tunggu.</div>
+            </form>
+        </div>
+
+        <!-- Form Menu Pengembalian Buku -->
+        <div id="formKembali" class="form-section">
+            <h2>Formulir Pengembalian Buku</h2>
+            <form id="kembaliForm" onsubmit="handleSubmit(event, 'kembali')">
+                <div class="form-group">
+                    <label for="namaKembali">Nama Peminjam</label>
+                    <input type="text" id="namaKembali" required placeholder="Masukkan nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="bukuKembali">Pinjam Buku Apa (Judul Buku)</label>
+                    <input type="text" id="bukuKembali" required placeholder="Masukkan judul buku yang dikembalikan">
+                </div>
+                <div class="form-group">
+                    <label for="tanggalKembali">Tanggal Pinjam (Sesuai saat awal meminjam)</label>
+                    <input type="date" id="tanggalKembali" required>
+                </div>
+                <div class="form-group">
+                    <label for="hpKembali">Nomor Handphone Peminjam</label>
+                    <input type="tel" id="hpKembali" required placeholder="Contoh: 081234567890">
+                </div>
+                <div class="form-group">
+                    <label for="fotoKembali">Bukti Foto (Kondisi Buku Saat Dikembalikan)</label>
+                    <input type="file" id="fotoKembali" accept="image/*" required>
+                </div>
+                <button type="submit" class="submit-btn" id="submitKembaliBtn">Kirim & Simpan Data Pengembalian</button>
+                <div class="loading" id="loadingKembali">Mengunggah foto ke Google Drive & menyimpan data... Mohon tunggu.</div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Ganti dengan URL Web App Google Apps Script Anda
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxq_dSJqoQU4tOddJyZBBU3tfIpdAERw6yL3AYB0c21TEkhMm1-kAP0CcVO2hU_dI_q6A/exec';
+
+        function switchTab(target) {
+            const btnPinjamTab = document.getElementById('btnPinjamTab');
+            const btnKembaliTab = document.getElementById('btnKembaliTab');
+            const formPinjam = document.getElementById('formPinjam');
+            const formKembali = document.getElementById('formKembali');
+
+            if (target === 'pinjam') {
+                btnPinjamTab.classList.add('active');
+                btnKembaliTab.classList.remove('active');
+                formPinjam.classList.add('active');
+                formKembali.classList.remove('active');
+            } else {
+                btnKembaliTab.classList.add('active');
+                btnPinjamTab.classList.remove('active');
+                formKembali.classList.add('active');
+                formPinjam.classList.remove('active');
+            }
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function handleSubmit(event, actionType) {
+            event.preventDefault();
+
+            const isPinjam = actionType === 'pinjam';
+            const prefix = isPinjam ? 'Pinjam' : 'Kembali';
+
+            const btn = document.getElementById(`submit${prefix}Btn`);
+            const loading = document.getElementById(`loading${prefix}`);
+
+            const nama = document.getElementById(`nama${prefix}`).value;
+            const buku = document.getElementById(`buku${prefix}`).value;
+            const tanggal = document.getElementById(`tanggal${prefix}`).value;
+            const nohp = document.getElementById(`hp${prefix}`).value;
+            const fileInput = document.getElementById(`foto${prefix}`);
+
+            btn.style.display = 'none';
+            loading.style.display = 'block';
+
+            let fotoData = "";
+            let fotoName = "";
+
+            if (fileInput.files.length > 0) {
+                try {
+                    const file = fileInput.files[0];
+                    fotoName = file.name;
+                    fotoData = await toBase64(file);
+                } catch (err) {
+                    console.error("Gagal membaca file gambar", err);
+                }
+            }
+
+            const payload = {
+                action: actionType, // 'pinjam' atau 'kembali'
+                nama: nama,
+                buku: buku,
+                tanggal: tanggal,
+                nohp: nohp,
+                fotoName: fotoName,
+                fotoData: fotoData
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert(`Data ${isPinjam ? 'Peminjaman' : 'Pengembalian'} Berhasil! Foto tersimpan ke Google Drive & Link tercatat di Spreadsheet.`);
+                document.getElementById(`${actionType}Form`).reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengirim data.');
+            })
+            .finally(() => {
+                btn.style.display = 'block';
+                loading.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
